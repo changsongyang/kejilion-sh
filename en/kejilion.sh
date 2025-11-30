@@ -1853,7 +1853,7 @@ patch_wp_url() {
   local SITE_URL="$2"
   local TARGET_DIR="/home/web/html"
 
-  find "$TARGET_DIR" -type f -name "wp-config.php" | while read -r FILE; do
+  find "$TARGET_DIR" -type f -name "wp-config-sample.php" | while read -r FILE; do
 	# Delete old definition
 	sed -i "/define(['\"]WP_HOME['\"].*/d" "$FILE"
 	sed -i "/define(['\"]WP_SITEURL['\"].*/d" "$FILE"
@@ -2841,7 +2841,7 @@ while true; do
 			rm -f /home/docker/${docker_name}_port.conf
 
 			sed -i "/\b${app_id}\b/d" /home/docker/appno.txt
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 			send_stats "uninstall$docker_name"
 			;;
 
@@ -3277,8 +3277,9 @@ ldnmp_wp() {
   sed -i "s|username_here|$dbuse|g" /home/web/html/$yuming/wordpress/wp-config-sample.php
   sed -i "s|password_here|$dbusepasswd|g" /home/web/html/$yuming/wordpress/wp-config-sample.php
   sed -i "s|localhost|mysql|g" /home/web/html/$yuming/wordpress/wp-config-sample.php
-  cp /home/web/html/$yuming/wordpress/wp-config-sample.php /home/web/html/$yuming/wordpress/wp-config.php
   patch_wp_url "https://$yuming" "https://$yuming"
+  cp /home/web/html/$yuming/wordpress/wp-config-sample.php /home/web/html/$yuming/wordpress/wp-config.php
+
 
   restart_ldnmp
   nginx_web_on
@@ -4138,7 +4139,7 @@ frps_panel() {
 				close_port 8055 8056
 
 				sed -i "/\b${app_id}\b/d" /home/docker/appno.txt
-				echo "App has been uninstalled"
+				echo "App uninstalled"
 				;;
 			5)
 				echo "Reverse intranet penetration service into domain name access"
@@ -4235,7 +4236,7 @@ frpc_panel() {
 				close_port 8055
 
 				sed -i "/\b${app_id}\b/d" /home/docker/appno.txt
-				echo "App has been uninstalled"
+				echo "App uninstalled"
 				;;
 
 			4)
@@ -4525,9 +4526,8 @@ linux_clean() {
 
 bbr_on() {
 
-cat > /etc/sysctl.conf << EOF
-net.ipv4.tcp_congestion_control=bbr
-EOF
+sed -i '/net.ipv4.tcp_congestion_control=/d' /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
 sysctl -p
 
 }
@@ -4695,7 +4695,7 @@ add_sshkey() {
 		   -e 's/^\s*#\?\s*ChallengeResponseAuthentication .*/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
 	rm -rf /etc/ssh/sshd_config.d/* /etc/ssh/ssh_config.d/*
 	restart_ssh
-	echo -e "${gl_lv}ROOT private key login has been turned on, ROOT password login has been turned off, reconnection will take effect${gl_bai}"
+	echo -e "${gl_lv}ROOT private key login has been turned on, ROOT password login has been turned off, and reconnection will take effect.${gl_bai}"
 
 }
 
@@ -4738,7 +4738,7 @@ sed -i 's/^\s*#\?\s*PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_confi
 sed -i 's/^\s*#\?\s*PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config;
 rm -rf /etc/ssh/sshd_config.d/* /etc/ssh/ssh_config.d/*
 restart_ssh
-echo -e "${gl_lv}ROOT login setup is completed!${gl_bai}"
+echo -e "${gl_lv}ROOT login setup is complete!${gl_bai}"
 
 }
 
@@ -5013,7 +5013,7 @@ dd_xitong() {
 				;;
 
 			  41)
-				send_stats "Reinstall windows 11"
+				send_stats "Reinstall Windows 11"
 				dd_xitong_2
 				bash InstallNET.sh -windows 11 -lang "cn"
 				reboot
@@ -5547,7 +5547,7 @@ restore_defaults() {
 
 # Website building optimization function
 optimize_web_server() {
-	echo -e "${gl_lv}Switch to website building optimization mode...${gl_bai}"
+	echo -e "${gl_lv}Switch to website construction optimization mode...${gl_bai}"
 
 	echo -e "${gl_lv}Optimize file descriptors...${gl_bai}"
 	ulimit -n 65535
@@ -6776,7 +6776,7 @@ linux_tools() {
 
   while true; do
 	  clear
-	  # send_stats "Basic Tools"
+	  # send_stats "Basic tools"
 	  echo -e "basic tools"
 	  echo -e "${gl_kjlan}------------------------"
 	  echo -e "${gl_kjlan}1.   ${gl_bai}curl download tool${gl_huang}★${gl_bai}                   ${gl_kjlan}2.   ${gl_bai}wget download tool${gl_huang}★${gl_bai}"
@@ -7057,7 +7057,7 @@ linux_bbr() {
 					send_stats "alpine opens bbr3"
 					  ;;
 				  2)
-					sed -i '/net.ipv4.tcp_congestion_control=bbr/d' /etc/sysctl.conf
+					sed -i '/net.ipv4.tcp_congestion_control=/d' /etc/sysctl.conf
 					sysctl -p
 					server_reboot
 					  ;;
@@ -7718,7 +7718,7 @@ linux_test() {
 	  echo -e "${gl_kjlan}14.  ${gl_bai}nxtrace fast backhaul test script"
 	  echo -e "${gl_kjlan}15.  ${gl_bai}nxtrace specifies IP backhaul test script"
 	  echo -e "${gl_kjlan}16.  ${gl_bai}ludashi2020 three network line test"
-	  echo -e "${gl_kjlan}17.  ${gl_bai}i-abc multi-function speed test script"
+	  echo -e "${gl_kjlan}17.  ${gl_bai}i-abc multifunctional speed test script"
 	  echo -e "${gl_kjlan}18.  ${gl_bai}NetQuality network quality check script${gl_huang}★${gl_bai}"
 
 	  echo -e "${gl_kjlan}------------------------"
@@ -9515,7 +9515,7 @@ while true; do
 					rm -rf /home/docker/mail
 
 					sed -i "/\b${app_id}\b/d" /home/docker/appno.txt
-					echo "App has been uninstalled"
+					echo "App uninstalled"
 					;;
 
 				*)
@@ -9569,7 +9569,7 @@ while true; do
 			docker rm -f db
 			docker rmi -f mongo:latest
 			rm -rf /home/docker/mongo
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -9667,7 +9667,7 @@ while true; do
 		docker_app_uninstall() {
 			cd /home/docker/cloud/ && docker compose down --rmi all
 			rm -rf /home/docker/cloud
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -10552,7 +10552,7 @@ while true; do
 			docker rmi -f grafana/grafana:latest
 
 			rm -rf /home/docker/monitoring
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -10773,7 +10773,7 @@ while true; do
 		docker_app_uninstall() {
 			cd  /home/docker/dify/docker/ && docker compose down --rmi all
 			rm -rf /home/docker/dify
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -10824,7 +10824,7 @@ while true; do
 		docker_app_uninstall() {
 			cd  /home/docker/new-api/ && docker compose down --rmi all
 			rm -rf /home/docker/new-api
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -10865,7 +10865,7 @@ while true; do
 			cd /opt
 			rm -rf jumpserver-installer*/
 			rm -rf jumpserver
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -10928,7 +10928,7 @@ while true; do
 		docker_app_uninstall() {
 			cd  /home/docker/ragflow/docker/ && docker compose down --rmi all
 			rm -rf /home/docker/ragflow
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -11256,7 +11256,7 @@ while true; do
 		docker_app_uninstall() {
 			cd /home/docker/moontv/ && docker compose down --rmi all
 			rm -rf /home/docker/moontv
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -11477,7 +11477,7 @@ while true; do
 		  docker_app_uninstall() {
 			  cd /home/docker/linkwarden && docker compose down --rmi all
 			  rm -rf /home/docker/linkwarden
-			  echo "App has been uninstalled"
+			  echo "App uninstalled"
 		  }
 
 		  docker_app_plus
@@ -11527,7 +11527,7 @@ while true; do
 			  cd "$(ls -dt */ | head -n 1)"
 			  docker compose down --rmi all
 			  rm -rf /home/docker/jitsi
-			  echo "App has been uninstalled"
+			  echo "App uninstalled"
 		  }
 
 		  docker_app_plus
@@ -11583,6 +11583,7 @@ while true; do
 			  -v /home/docker/komari:/app/data \
 			  -e ADMIN_USERNAME=admin \
 			  -e ADMIN_PASSWORD=1212156 \
+			  -e TZ=Asia/Shanghai \
 			  --restart=always \
 			  ghcr.io/komari-monitor/komari:latest
 
@@ -11662,7 +11663,7 @@ while true; do
 		  docker_app_uninstall() {
 			  cd /home/docker/${docker_name} && docker compose down --rmi all
 			  rm -rf /home/docker/${docker_name}
-			  echo "App has been uninstalled"
+			  echo "App uninstalled"
 		  }
 
 		  docker_app_plus
@@ -11889,7 +11890,7 @@ while true; do
 		docker_app_uninstall() {
 			cd /home/docker/gitea/ && docker compose down --rmi all
 			rm -rf /home/docker/gitea
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12027,7 +12028,7 @@ while true; do
 		docker_app_uninstall() {
 			cd /home/docker/paperless/ && docker compose down --rmi all
 			rm -rf /home/docker/paperless
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12081,7 +12082,7 @@ while true; do
 		docker_app_uninstall() {
 			cd /home/docker/2fauth/ && docker compose down --rmi all
 			rm -rf /home/docker/2fauth
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12314,7 +12315,7 @@ while true; do
 		docker_app_uninstall() {
 			cd /home/docker/dsm/ && docker compose down --rmi all
 			rm -rf /home/docker/dsm
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12384,7 +12385,7 @@ while true; do
 		docker_app_uninstall() {
 			cd  /home/docker/MoneyPrinterTurbo/ && docker compose down --rmi all
 			rm -rf /home/docker/MoneyPrinterTurbo
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12453,7 +12454,7 @@ while true; do
 		docker_app_uninstall() {
 			cd  /home/docker/umami/ && docker compose down --rmi all
 			rm -rf /home/docker/umami
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12594,7 +12595,7 @@ discourse,yunsou,ahhhhfs,nsgame,gying" \
 		docker_app_uninstall() {
 			cd  /home/docker/LangBot/docker/ && docker compose down --rmi all
 			rm -rf /home/docker/LangBot
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12664,7 +12665,7 @@ discourse,yunsou,ahhhhfs,nsgame,gying" \
 		docker_app_uninstall() {
 			cd  /home/docker/karakeep/docker/ && docker compose down --rmi all
 			rm -rf /home/docker/karakeep
-			echo "App has been uninstalled"
+			echo "App uninstalled"
 		}
 
 		docker_app_plus
@@ -12772,7 +12773,7 @@ linux_work() {
 	  send_stats "Backend workspace"
 	  echo -e "Backend workspace"
 	  echo -e "The system will provide you with a workspace that can run permanently in the background, which you can use to perform long-term tasks."
-	  echo -e "Even if you disconnect SSH, the tasks in the workspace will not be interrupted, and the background tasks will persist."
+	  echo -e "Even if you disconnect SSH, the tasks in the workspace will not be interrupted, and the tasks will remain in the background."
 	  echo -e "${gl_huang}hint:${gl_bai}After entering the workspace, use Ctrl+b and then press d alone to exit the workspace!"
 	  echo -e "${gl_kjlan}------------------------"
 	  echo "List of currently existing workspaces"
@@ -13255,8 +13256,8 @@ EOF
 						;;
 					2)
 						rm -f /etc/gai.conf
-						echo "Switched to IPv6 first"
-						send_stats "Switched to IPv6 first"
+						echo "Switched to IPv6 priority"
+						send_stats "Switched to IPv6 priority"
 						;;
 
 					3)
@@ -13613,7 +13614,7 @@ EOF
 				  ;;
 			  4)
 				  send_stats "Intelligent switching of update sources"
-				  switch_mirror true true
+				  switch_mirror false false
 				  ;;
 
 			  *)
@@ -14060,7 +14061,7 @@ EOF
 				  clear
 				  send_stats "One-stop tuning starts"
 				  echo "------------------------------------------------"
-				  switch_mirror true true
+				  switch_mirror false false
 				  linux_update
 				  echo -e "[${gl_lv}OK${gl_bai}] 1/12. Update the system to the latest"
 
@@ -14494,7 +14495,7 @@ while true; do
 	  echo -e "${gl_kjlan}Execute tasks in batches${gl_bai}"
 	  echo -e "${gl_kjlan}11. ${gl_bai}Install technology lion script${gl_kjlan}12. ${gl_bai}Update system${gl_kjlan}13. ${gl_bai}Clean the system"
 	  echo -e "${gl_kjlan}14. ${gl_bai}Install docker${gl_kjlan}15. ${gl_bai}Install BBR3${gl_kjlan}16. ${gl_bai}Set 1G virtual memory"
-	  echo -e "${gl_kjlan}17. ${gl_bai}Set time zone to Shanghai${gl_kjlan}18. ${gl_bai}Open all ports${gl_kjlan}51. ${gl_bai}custom directive"
+	  echo -e "${gl_kjlan}17. ${gl_bai}Set time zone to Shanghai${gl_kjlan}18. ${gl_bai}Open all ports${gl_kjlan}51. ${gl_bai}Custom instructions"
 	  echo -e "${gl_kjlan}------------------------${gl_bai}"
 	  echo -e "${gl_kjlan}0.  ${gl_bai}Return to main menu"
 	  echo -e "${gl_kjlan}------------------------${gl_bai}"

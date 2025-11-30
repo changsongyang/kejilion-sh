@@ -1090,7 +1090,7 @@ iptables_panel() {
 		  echo "3. 모든 포트를 엽니다. 4. 모든 포트를 닫습니다."
 		  echo "------------------------"
 		  echo "5. IP 화이트리스트 6. IP 블랙리스트"
-		  echo "7. 지정된 IP를 삭제합니다."
+		  echo "7. 지정된 IP 지우기"
 		  echo "------------------------"
 		  echo "11. PING 허용 12. PING 비활성화"
 		  echo "------------------------"
@@ -1853,7 +1853,7 @@ patch_wp_url() {
   local SITE_URL="$2"
   local TARGET_DIR="/home/web/html"
 
-  find "$TARGET_DIR" -type f -name "wp-config.php" | while read -r FILE; do
+  find "$TARGET_DIR" -type f -name "wp-config-sample.php" | while read -r FILE; do
 	# 이전 정의 삭제
 	sed -i "/define(['\"]WP_HOME['\"].*/d" "$FILE"
 	sed -i "/define(['\"]WP_SITEURL['\"].*/d" "$FILE"
@@ -3233,7 +3233,7 @@ ldnmp_web_on() {
 	  echo "당신의$webname지어졌습니다!"
 	  echo "https://$yuming"
 	  echo "------------------------"
-	  echo "$webname설치정보는 다음과 같습니다."
+	  echo "$webname설치 정보는 다음과 같습니다."
 
 }
 
@@ -3277,8 +3277,9 @@ ldnmp_wp() {
   sed -i "s|username_here|$dbuse|g" /home/web/html/$yuming/wordpress/wp-config-sample.php
   sed -i "s|password_here|$dbusepasswd|g" /home/web/html/$yuming/wordpress/wp-config-sample.php
   sed -i "s|localhost|mysql|g" /home/web/html/$yuming/wordpress/wp-config-sample.php
-  cp /home/web/html/$yuming/wordpress/wp-config-sample.php /home/web/html/$yuming/wordpress/wp-config.php
   patch_wp_url "https://$yuming" "https://$yuming"
+  cp /home/web/html/$yuming/wordpress/wp-config-sample.php /home/web/html/$yuming/wordpress/wp-config.php
+
 
   restart_ldnmp
   nginx_web_on
@@ -3299,7 +3300,7 @@ ldnmp_Proxy() {
 		add_yuming
 	fi
 	if [ -z "$reverseproxy" ]; then
-		read -e -p "안티 세대 IP를 입력하십시오(기본값은 로컬 IP 127.0.0.1로 설정하려면 Enter를 누르십시오)." reverseproxy
+		read -e -p "세대 방지 IP를 입력하십시오(기본값은 로컬 IP 127.0.0.1로 설정하려면 Enter를 누르십시오)." reverseproxy
 		reverseproxy=${reverseproxy:-127.0.0.1}
 	fi
 
@@ -4525,9 +4526,8 @@ linux_clean() {
 
 bbr_on() {
 
-cat > /etc/sysctl.conf << EOF
-net.ipv4.tcp_congestion_control=bbr
-EOF
+sed -i '/net.ipv4.tcp_congestion_control=/d' /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
 sysctl -p
 
 }
@@ -4695,7 +4695,7 @@ add_sshkey() {
 		   -e 's/^\s*#\?\s*ChallengeResponseAuthentication .*/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
 	rm -rf /etc/ssh/sshd_config.d/* /etc/ssh/ssh_config.d/*
 	restart_ssh
-	echo -e "${gl_lv}ROOT 개인 키 로그인이 활성화되었습니다. ROOT 비밀번호 로그인이 비활성화되었습니다. 다시 연결이 적용됩니다.${gl_bai}"
+	echo -e "${gl_lv}ROOT 개인키 로그인이 활성화되어 있고, ROOT 비밀번호 로그인이 비활성화되어 재접속이 적용됩니다.${gl_bai}"
 
 }
 
@@ -5327,7 +5327,7 @@ clamav_freshclam() {
 
 clamav_scan() {
 	if [ $# -eq 0 ]; then
-		echo "스캔할 디렉터리를 지정하십시오."
+		echo "스캔할 디렉터리를 지정하세요."
 		return
 	fi
 
@@ -5833,7 +5833,7 @@ linux_trash() {
 
 	clear
 	echo -e "현재 휴지통${trash_status}"
-	echo -e "활성화한 후에는 중요한 파일이 실수로 삭제되는 것을 방지하기 위해 rm으로 삭제된 파일이 먼저 휴지통에 저장됩니다!"
+	echo -e "활성화한 후에는 중요한 파일이 실수로 삭제되는 것을 방지하기 위해 rm으로 삭제된 파일이 먼저 휴지통에 들어갑니다!"
 	echo "------------------------------------------------"
 	ls -l --color=auto "$TRASH_DIR" 2>/dev/null || echo "휴지통이 비어 있습니다."
 	echo "------------------------"
@@ -7057,7 +7057,7 @@ linux_bbr() {
 					send_stats "알파인이 열립니다 bbr3"
 					  ;;
 				  2)
-					sed -i '/net.ipv4.tcp_congestion_control=bbr/d' /etc/sysctl.conf
+					sed -i '/net.ipv4.tcp_congestion_control=/d' /etc/sysctl.conf
 					sysctl -p
 					server_reboot
 					  ;;
@@ -7110,7 +7110,7 @@ docker_ssh_migration() {
 
 		echo -e "${YELLOW}Docker 컨테이너 백업 중...${NC}"
 		docker ps --format '{{.Names}}'
-		read -e -p  "백업할 컨테이너의 이름을 입력하십시오(실행 중인 모든 컨테이너를 백업하려면 여러 개의 공백을 구분하고 Enter 키를 누르십시오)." containers
+		read -e -p  "백업할 컨테이너의 이름을 입력하십시오(여러 개의 공백을 구분하고 Enter를 눌러 실행 중인 모든 컨테이너를 백업하십시오)." containers
 
 		install tar jq gzip
 		install_docker
@@ -7538,7 +7538,7 @@ linux_docker() {
 					  3)
 						  send_stats "네트워크에 가입하세요"
 						  read -e -p "종료 네트워크 이름:" dockernetwork
-						  read -e -p "이러한 컨테이너는 네트워크를 종료합니다(여러 컨테이너 이름을 공백으로 구분하세요)." dockernames
+						  read -e -p "해당 컨테이너는 네트워크를 종료합니다(여러 컨테이너 이름을 공백으로 구분하세요)." dockernames
 
 						  for dockername in $dockernames; do
 							  docker network disconnect $dockernetwork $dockername
@@ -9107,7 +9107,7 @@ while true; do
 	  echo -e "${gl_kjlan}67.  ${color67}ddns-go 동적 DNS 관리 도구${gl_huang}★${gl_bai}            ${gl_kjlan}68.  ${color68}AllinSSL 인증서 관리 플랫폼"
 	  echo -e "${gl_kjlan}69.  ${color69}SFTPGo 파일 전송 도구${gl_kjlan}70.  ${color70}AstrBot 챗봇 프레임워크"
 	  echo -e "${gl_kjlan}------------------------"
-	  echo -e "${gl_kjlan}71.  ${color71}Navidrome 개인 음악 서버${gl_kjlan}72.  ${color72}비트워든 비밀번호 관리자${gl_huang}★${gl_bai}"
+	  echo -e "${gl_kjlan}71.  ${color71}Navidrome 개인 음악 서버${gl_kjlan}72.  ${color72}비트워드 비밀번호 관리자${gl_huang}★${gl_bai}"
 	  echo -e "${gl_kjlan}73.  ${color73}LibreTV 개인 영화${gl_kjlan}74.  ${color74}MoonTV 개인 영화"
 	  echo -e "${gl_kjlan}75.  ${color75}멜로디 음악 마법사${gl_kjlan}76.  ${color76}온라인 DOS 오래된 게임"
 	  echo -e "${gl_kjlan}77.  ${color77}Thunder 오프라인 다운로드 도구${gl_kjlan}78.  ${color78}PandaWiki 지능형 문서 관리 시스템"
@@ -9127,7 +9127,7 @@ while true; do
 	  echo -e "${gl_kjlan}------------------------"
 	  echo -e "${gl_kjlan}101. ${color101}AI 영상 생성 도구${gl_kjlan}102. ${color102}VoceChat 다자간 온라인 채팅 시스템"
 	  echo -e "${gl_kjlan}103. ${color103}Umami 웹사이트 통계 도구${gl_kjlan}104. ${color104}스트림 4계층 프록시 전달 도구"
-	  echo -e "${gl_kjlan}105. ${color105}쓰위안 노트${gl_kjlan}106. ${color106}Drawnix 오픈 소스 화이트보드 도구"
+	  echo -e "${gl_kjlan}105. ${color105}쓰위안 노트${gl_kjlan}106. ${color106}Drawix 오픈 소스 화이트보드 도구"
 	  echo -e "${gl_kjlan}107. ${color107}PanSou 네트워크 디스크 검색${gl_kjlan}108. ${color108}LangBot 챗봇"
 	  echo -e "${gl_kjlan}109. ${color109}ZFile 온라인 네트워크 디스크${gl_kjlan}110. ${color110}Karakeep 북마크 관리"
 	  echo -e "${gl_kjlan}------------------------"
@@ -9443,7 +9443,7 @@ while true; do
 				1)
 					setup_docker_dir
 					check_disk_space 2 /home/docker
-					read -e -p "이메일 도메인 이름을 설정하세요(예: mail.yuming.com):" yuming
+					read -e -p "이메일 도메인 이름을 설정하십시오(예: mail.yuming.com):" yuming
 					mkdir -p /home/docker
 					echo "$yuming" > /home/docker/mail.txt
 					echo "------------------------"
@@ -11583,6 +11583,7 @@ while true; do
 			  -v /home/docker/komari:/app/data \
 			  -e ADMIN_USERNAME=admin \
 			  -e ADMIN_PASSWORD=1212156 \
+			  -e TZ=Asia/Shanghai \
 			  --restart=always \
 			  ghcr.io/komari-monitor/komari:latest
 
@@ -12772,7 +12773,7 @@ linux_work() {
 	  send_stats "백엔드 작업공간"
 	  echo -e "백엔드 작업공간"
 	  echo -e "시스템은 장기간 작업을 수행하는 데 사용할 수 있는 백그라운드에서 영구적으로 실행될 수 있는 작업 공간을 제공합니다."
-	  echo -e "SSH 연결을 끊더라도 작업 공간의 작업은 중단되지 않으며 백그라운드 작업은 유지됩니다."
+	  echo -e "SSH 연결을 끊더라도 작업 공간의 작업은 중단되지 않으며 작업은 백그라운드에 유지됩니다."
 	  echo -e "${gl_huang}힌트:${gl_bai}워크스페이스 진입 후 Ctrl+b를 누른 후 d만 눌러 워크스페이스를 종료하세요!"
 	  echo -e "${gl_kjlan}------------------------"
 	  echo "현재 존재하는 작업공간 목록"
@@ -12885,7 +12886,7 @@ linux_work() {
 			  echo -e "SSH 상주 모드${tmux_sshd_status}"
 			  echo "SSH 연결을 연 후 바로 상주 모드로 들어가고 이전 작업 상태로 바로 돌아갑니다."
 			  echo "------------------------"
-			  echo "1. 켜기 2. 끄기"
+			  echo "1. 켜짐 2. 꺼짐"
 			  echo "------------------------"
 			  echo "0. 이전 메뉴로 돌아가기"
 			  echo "------------------------"
@@ -13002,7 +13003,7 @@ linux_Settings() {
 	  echo -e "${gl_kjlan}3.   ${gl_bai}ROOT 비밀번호 로그인 모드${gl_kjlan}4.   ${gl_bai}지정된 버전의 Python 설치"
 	  echo -e "${gl_kjlan}5.   ${gl_bai}모든 포트 열기${gl_kjlan}6.   ${gl_bai}SSH 연결 포트 수정"
 	  echo -e "${gl_kjlan}7.   ${gl_bai}DNS 주소 최적화${gl_kjlan}8.   ${gl_bai}한 번의 클릭으로 시스템을 다시 설치${gl_huang}★${gl_bai}"
-	  echo -e "${gl_kjlan}9.   ${gl_bai}ROOT 계정을 비활성화하고 새 계정을 만듭니다.${gl_kjlan}10.  ${gl_bai}우선 순위 ipv4/ipv6 전환"
+	  echo -e "${gl_kjlan}9.   ${gl_bai}ROOT 계정을 비활성화하고 새 계정을 만듭니다.${gl_kjlan}10.  ${gl_bai}우선순위 ipv4/ipv6 전환"
 	  echo -e "${gl_kjlan}------------------------"
 	  echo -e "${gl_kjlan}11.  ${gl_bai}항만점유현황 확인${gl_kjlan}12.  ${gl_bai}가상 메모리 크기 수정"
 	  echo -e "${gl_kjlan}13.  ${gl_bai}사용자 관리${gl_kjlan}14.  ${gl_bai}사용자/비밀번호 생성기"
@@ -13255,8 +13256,8 @@ EOF
 						;;
 					2)
 						rm -f /etc/gai.conf
-						echo "먼저 IPv6로 전환됨"
-						send_stats "먼저 IPv6로 전환됨"
+						echo "IPv6 우선순위로 전환됨"
+						send_stats "IPv6 우선순위로 전환됨"
 						;;
 
 					3)
@@ -13613,7 +13614,7 @@ EOF
 				  ;;
 			  4)
 				  send_stats "업데이트 소스의 지능적인 전환"
-				  switch_mirror true true
+				  switch_mirror false false
 				  ;;
 
 			  *)
@@ -14060,7 +14061,7 @@ EOF
 				  clear
 				  send_stats "원스톱 튜닝 시작"
 				  echo "------------------------------------------------"
-				  switch_mirror true true
+				  switch_mirror false false
 				  linux_update
 				  echo -e "[${gl_lv}OK${gl_bai}] 1/12. 시스템을 최신으로 업데이트하세요"
 
@@ -14494,7 +14495,7 @@ while true; do
 	  echo -e "${gl_kjlan}일괄적으로 작업 실행${gl_bai}"
 	  echo -e "${gl_kjlan}11. ${gl_bai}기술 사자 스크립트 설치${gl_kjlan}12. ${gl_bai}시스템 업데이트${gl_kjlan}13. ${gl_bai}시스템 청소"
 	  echo -e "${gl_kjlan}14. ${gl_bai}도커 설치${gl_kjlan}15. ${gl_bai}BBR3 설치${gl_kjlan}16. ${gl_bai}1G 가상 메모리 설정"
-	  echo -e "${gl_kjlan}17. ${gl_bai}시간대를 상하이로 설정${gl_kjlan}18. ${gl_bai}모든 포트 열기${gl_kjlan}51. ${gl_bai}사용자 정의 지시어"
+	  echo -e "${gl_kjlan}17. ${gl_bai}시간대를 상하이로 설정${gl_kjlan}18. ${gl_bai}모든 포트 열기${gl_kjlan}51. ${gl_bai}맞춤 지침"
 	  echo -e "${gl_kjlan}------------------------${gl_bai}"
 	  echo -e "${gl_kjlan}0.  ${gl_bai}메인 메뉴로 돌아가기"
 	  echo -e "${gl_kjlan}------------------------${gl_bai}"
@@ -14535,7 +14536,7 @@ while true; do
 		  5)
 			  clear
 			  send_stats "클러스터 복원"
-			  echo "server.py를 업로드하고 아무 키나 눌러 업로드를 시작하세요!"
+			  echo "귀하의 server.py를 업로드하고 업로드를 시작하려면 아무 키나 누르십시오!"
 			  echo -e "업로드해주세요${gl_huang}servers.py${gl_bai}파일을 제출하다${gl_huang}/root/cluster/${gl_bai}복원 완료!"
 			  break_end
 			  ;;
