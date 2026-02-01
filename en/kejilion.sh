@@ -1,5 +1,5 @@
 #!/bin/bash
-sh_v="4.3.4"
+sh_v="4.3.5"
 
 
 gl_hui='\e[37m'
@@ -881,7 +881,7 @@ close_port() {
 		iptables -D INPUT -p tcp --dport $port -j ACCEPT 2>/dev/null
 		iptables -D INPUT -p udp --dport $port -j ACCEPT 2>/dev/null
 
-		# Add shutdown rule
+		# Add a shutdown rule
 		if ! iptables -C INPUT -p tcp --dport $port -j DROP 2>/dev/null; then
 			iptables -I INPUT 1 -p tcp --dport $port -j DROP
 		fi
@@ -1442,10 +1442,6 @@ install_ssltls() {
 					openssl req -x509 -key /etc/letsencrypt/live/$yuming/privkey.pem -out /etc/letsencrypt/live/$yuming/fullchain.pem -days 5475 -subj "/C=US/ST=State/L=City/O=Organization/OU=Organizational Unit/CN=Common Name"
 				fi
 			else
-				if ! iptables -C INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null; then
-					iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT
-				fi
-
 				docker run --rm -p 80:80 -v /etc/letsencrypt/:/etc/letsencrypt certbot/certbot certonly --standalone -d "$yuming" --email your@email.com --agree-tos --no-eff-email --force-renewal --key-type ecdsa
 			fi
 	  fi
@@ -1602,16 +1598,11 @@ certs_status() {
 			fi
 
 	  		  ;;
-	  	  3)
+	  	  *)
 	  	  	send_stats "Switch to HTTP access without a certificate"
 		  	sed -i '/if (\$scheme = http) {/,/}/s/^/#/' /home/web/conf.d/${yuming}.conf
 			sed -i '/ssl_certificate/d; /ssl_certificate_key/d' /home/web/conf.d/${yuming}.conf
 			sed -i '/443 ssl/d; /443 quic/d' /home/web/conf.d/${yuming}.conf
-	  		  ;;
-	  	  *)
-	  	  	send_stats "Withdraw application"
-			rm -f /home/web/conf.d/${yuming}.conf
-			exit
 	  		  ;;
 		esac
 	fi
@@ -2328,7 +2319,7 @@ check_nginx_compression() {
 
 	# Check whether zstd is on and uncommented (the whole line starts with zstd on;)
 	if grep -qE '^\s*zstd\s+on;' "$CONFIG_FILE"; then
-		zstd_status="zstd compression is enabled"
+		zstd_status="zstd compression is on"
 	else
 		zstd_status=""
 	fi
@@ -2677,7 +2668,7 @@ clear_container_rules() {
 		iptables -D DOCKER-USER -p tcp -d "$container_ip" -j DROP
 	fi
 
-	# Clear the rules that allow specified IPs
+	# Clear the rules that allow the specified IP
 	if iptables -C DOCKER-USER -p tcp -s "$allowed_ip" -d "$container_ip" -j ACCEPT &>/dev/null; then
 		iptables -D DOCKER-USER -p tcp -s "$allowed_ip" -d "$container_ip" -j ACCEPT
 	fi
@@ -2696,7 +2687,7 @@ clear_container_rules() {
 		iptables -D DOCKER-USER -p udp -d "$container_ip" -j DROP
 	fi
 
-	# Clear the rules that allow specified IPs
+	# Clear the rules that allow the specified IP
 	if iptables -C DOCKER-USER -p udp -s "$allowed_ip" -d "$container_ip" -j ACCEPT &>/dev/null; then
 		iptables -D DOCKER-USER -p udp -s "$allowed_ip" -d "$container_ip" -j ACCEPT
 	fi
@@ -3529,7 +3520,7 @@ ldnmp_Proxy_backend() {
 list_stream_services() {
 
 	STREAM_DIR="/home/web/stream.d"
-	printf "%-25s %-18s %-25s %-20s\n" "Service name" "Communication type" "Local address" "Backend address"
+	printf "%-25s %-18s %-25s %-20s\n" "Service name" "Communication type" "local address" "Backend address"
 
 	if [ -z "$(ls -A "$STREAM_DIR")" ]; then
 		return
@@ -4898,7 +4889,7 @@ import_sshkey() {
 	if [[ ! "$public_key" =~ ^ssh-(rsa|ed25519|ecdsa) ]]; then
 		echo -e "${gl_hong}Error: Does not look like a legitimate SSH public key.${gl_bai}"
 		return 1
-	fi	
+	fi
 
 	if grep -Fxq "$public_key" ~/.ssh/authorized_keys 2>/dev/null; then
 		echo "The public key already exists, no need to add it again"
@@ -5059,7 +5050,7 @@ sshkey_panel() {
 	  	  IS_KEY_ENABLED="${gl_hui}Not enabled${gl_bai}"
 	  fi
   	  echo -e "ROOT private key login mode${IS_KEY_ENABLED}"
-  	  echo "Video introduction: https://www.bilibili.com/video/BV1Q4421X78n?t=209.4"
+  	  echo "Advanced gameplay: https://blog.kejilion.pro/ssh-key"
   	  echo "------------------------------------------------"
   	  echo "A key pair will be generated, a more secure way to log in via SSH"
 	  echo "------------------------"
@@ -5134,7 +5125,7 @@ sed -i 's/^\s*#\?\s*PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_confi
 sed -i 's/^\s*#\?\s*PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config;
 rm -rf /etc/ssh/sshd_config.d/* /etc/ssh/ssh_config.d/*
 restart_ssh
-echo -e "${gl_lv}ROOT login setup is completed!${gl_bai}"
+echo -e "${gl_lv}ROOT login setup is complete!${gl_bai}"
 
 }
 
@@ -6025,7 +6016,7 @@ Kernel_optimize() {
 			  cd ~
 			  clear
 			  optimize_web_server
-			  send_stats "Website optimization mode"
+			  send_stats "Website optimization model"
 			  ;;
 		  4)
 			  cd ~
@@ -6288,9 +6279,9 @@ send_stats "Command Favorites"
 bash <(curl -l -s ${gh_proxy}raw.githubusercontent.com/byJoey/cmdbox/refs/heads/main/install.sh)
 }
 
-# Create backup
+# Create a backup
 create_backup() {
-	send_stats "Create backup"
+	send_stats "Create a backup"
 	local TIMESTAMP=$(date +"%Y%m%d%H%M%S")
 
 	# Prompt user for backup directory
@@ -6332,7 +6323,7 @@ create_backup() {
 		echo "- $path"
 	done
 
-	# Create backup
+	# Create a backup
 	echo "Creating backup$BACKUP_NAME..."
 	install tar
 	tar -czvf "$BACKUP_DIR/$BACKUP_NAME" "${BACKUP_PATHS[@]}"
@@ -6753,7 +6744,7 @@ disk_manager() {
 	send_stats "Hard disk management function"
 	while true; do
 		clear
-		echo "Hard disk partition management"
+		echo "Hard drive partition management"
 		echo -e "${gl_huang}This feature is under internal testing and should not be used in a production environment.${gl_bai}"
 		echo "------------------------"
 		list_partitions
@@ -6960,7 +6951,7 @@ run_task() {
 	else
 		echo "Sync failed! Please check the following:"
 		echo "1. Is the network connection normal?"
-		echo "2. Whether the remote host is accessible"
+		echo "2. Is the remote host accessible?"
 		echo "3. Is the authentication information correct?"
 		echo "4. Do the local and remote directories have correct access permissions?"
 	fi
@@ -7175,7 +7166,7 @@ linux_tools() {
 
   while true; do
 	  clear
-	  # send_stats "Basic tools"
+	  # send_stats "Basic Tools"
 	  echo -e "basic tools"
 	  echo -e "${gl_kjlan}------------------------"
 	  echo -e "${gl_kjlan}1.   ${gl_bai}curl download tool${gl_huang}★${gl_bai}                   ${gl_kjlan}2.   ${gl_bai}wget download tool${gl_huang}★${gl_bai}"
@@ -7764,7 +7755,7 @@ docker_ssh_migration() {
 
 		echo -e "${YELLOW}Transferring backup...${NC}"
 		if [[ -z "$TARGET_PASS" ]]; then
-			# Log in using key
+			# Log in with key
 			scp -P "$TARGET_PORT" -o StrictHostKeyChecking=no -r "$LATEST_TAR" "$TARGET_USER@$TARGET_IP:/tmp/"
 		fi
 
@@ -8131,7 +8122,7 @@ linux_test() {
 	  echo -e "${gl_kjlan}14.  ${gl_bai}nxtrace fast backhaul test script"
 	  echo -e "${gl_kjlan}15.  ${gl_bai}nxtrace specifies IP backhaul test script"
 	  echo -e "${gl_kjlan}16.  ${gl_bai}ludashi2020 three network line test"
-	  echo -e "${gl_kjlan}17.  ${gl_bai}i-abc multi-function speed test script"
+	  echo -e "${gl_kjlan}17.  ${gl_bai}i-abc multifunctional speed test script"
 	  echo -e "${gl_kjlan}18.  ${gl_bai}NetQuality network quality check script${gl_huang}★${gl_bai}"
 
 	  echo -e "${gl_kjlan}------------------------"
@@ -9525,7 +9516,7 @@ while true; do
 
 	  echo -e "${gl_kjlan}1.   ${color1}Pagoda panel official version${gl_kjlan}2.   ${color2}aaPanel Pagoda International Version"
 	  echo -e "${gl_kjlan}3.   ${color3}1Panel new generation management panel${gl_kjlan}4.   ${color4}NginxProxyManager visualization panel"
-	  echo -e "${gl_kjlan}5.   ${color5}OpenList multi-store file list program${gl_kjlan}6.   ${color6}Ubuntu Remote Desktop Web Version"
+	  echo -e "${gl_kjlan}5.   ${color5}OpenList multi-store file list program${gl_kjlan}6.   ${color6}Ubuntu Remote Desktop Web Edition"
 	  echo -e "${gl_kjlan}7.   ${color7}Nezha Probe VPS Monitoring Panel${gl_kjlan}8.   ${color8}QB offline BT magnetic download panel"
 	  echo -e "${gl_kjlan}9.   ${color9}Poste.io mail server program${gl_kjlan}10.  ${color10}RocketChat multi-person online chat system"
 	  echo -e "${gl_kjlan}-------------------------"
@@ -11633,7 +11624,7 @@ while true; do
 
 		}
 
-		local docker_describe="It is a lightweight, high-performance music streaming server"
+		local docker_describe="Is a lightweight, high-performance music streaming server"
 		local docker_url="Official website introduction: https://www.navidrome.org/"
 		local docker_use=""
 		local docker_passwd=""
@@ -13636,6 +13627,184 @@ fail2ban_panel() {
 
 
 
+net_menu() {
+
+	send_stats "Network card management tool"
+	show_nics() {
+		echo "================ Current network card information ================"
+		printf "%-18s %-12s %-20s %-26s\n" "Network card name" "state" "IP address" "MAC address"
+		echo "------------------------------------------------"
+		for nic in $(ls /sys/class/net); do
+			state=$(cat /sys/class/net/$nic/operstate 2>/dev/null)
+			ipaddr=$(ip -4 addr show $nic | awk '/inet /{print $2}' | head -n1)
+			mac=$(cat /sys/class/net/$nic/address 2>/dev/null)
+			printf "%-15s %-10s %-18s %-20s\n" "$nic" "$state" "${ipaddr:-无}" "$mac"
+		done
+		echo "================================================"
+	}
+
+	while true; do
+		clear
+		show_nics
+		echo
+		echo "=========== Network card management menu ==========="
+		echo "1. Enable network card"
+		echo "2. Disable network card"
+		echo "3. View network card details"
+		echo "4. Refresh network card information"
+		echo "0. Return to the previous menu"
+		echo "===================================="
+		read -rp "Please select an action:" choice
+
+		case $choice in
+			1)
+				send_stats "Enable network card"
+				read -rp "Please enter the name of the network card to be enabled:" nic
+				if ip link show "$nic" &>/dev/null; then
+					ip link set "$nic" up && echo "✔ Network card$nicEnabled"
+				else
+					echo "✘ The network card does not exist"
+				fi
+				read -rp "Press Enter to continue..."
+				;;
+			2)
+				send_stats "Disable network card"
+				read -rp "Please enter the name of the network card to be disabled:" nic
+				if ip link show "$nic" &>/dev/null; then
+					ip link set "$nic" down && echo "✔ Network card$nicDisabled"
+				else
+					echo "✘ The network card does not exist"
+				fi
+				read -rp "Press Enter to continue..."
+				;;
+			3)
+				send_stats "View network card details"
+				read -rp "Please enter the name of the network card you want to view:" nic
+				if ip link show "$nic" &>/dev/null; then
+					echo "========== $nicDetails =========="
+					ip addr show "$nic"
+					ethtool "$nic" 2>/dev/null | head -n 10
+				else
+					echo "✘ The network card does not exist"
+				fi
+				read -rp "Press Enter to continue..."
+				;;
+			4)
+				send_stats "Refresh network card information"
+				continue
+				;;
+			*)
+				break
+				;;
+		esac
+	done
+}
+
+
+
+log_menu() {
+	send_stats "System log management tool"
+
+	show_log_overview() {
+		echo "============= System log overview ============="
+		echo "Hostname: $(hostname)"
+		echo "System time: $(date)"
+		echo
+		echo "[/var/log directory occupation]"
+		du -sh /var/log 2>/dev/null
+		echo
+		echo "[journal log occupation]"
+		journalctl --disk-usage 2>/dev/null
+		echo "========================================"
+	}
+
+	while true; do
+		clear
+		show_log_overview
+		echo
+		echo "=========== System log management menu ==========="
+		echo "1. View the latest system log (journal)"
+		echo "2. View the specified service log"
+		echo "3. View login/security logs"
+		echo "4. Real-time tracking logs"
+		echo "5. Clean up old journal logs"
+		echo "0. Return to the previous menu"
+		echo "======================================="
+		read -rp "Please select an action:" choice
+
+		case $choice in
+			1)
+				send_stats "View recent logs"
+				read -rp "View the most recent log lines? [Default 100]:" lines
+				lines=${lines:-100}
+				journalctl -n "$lines" --no-pager
+				read -rp "Press Enter to continue..."
+				;;
+			2)
+				send_stats "View specified service logs"
+				read -rp "Please enter the service name (such as sshd, nginx):" svc
+				if systemctl list-unit-files | grep -q "^$svc"; then
+					journalctl -u "$svc" -n 100 --no-pager
+				else
+					echo "✘ The service does not exist or has no logs"
+				fi
+				read -rp "Press Enter to continue..."
+				;;
+			3)
+				send_stats "View login/security logs"
+				echo "====== Recent login log ======"
+				last -n 10
+				echo
+				echo "====== Authentication Log ======"
+				if [ -f /var/log/secure ]; then
+					tail -n 20 /var/log/secure
+				elif [ -f /var/log/auth.log ]; then
+					tail -n 20 /var/log/auth.log
+				else
+					echo "Security log file not found"
+				fi
+				read -rp "Press Enter to continue..."
+				;;
+			4)
+				send_stats "Real-time tracking log"
+				echo "1) System log"
+				echo "2) Specify service log"
+				read -rp "Select tracking type:" t
+				if [ "$t" = "1" ]; then
+					journalctl -f
+				elif [ "$t" = "2" ]; then
+					read -rp "Enter service name:" svc
+					journalctl -u "$svc" -f
+				else
+					echo "Invalid selection"
+				fi
+				;;
+			5)
+				send_stats "Clean up old journal logs"
+				echo "⚠️ Clean the journal (safe way)"
+				echo "1) Keep the last 7 days"
+				echo "2) Keep the last 3 days"
+				echo "3) Limit the maximum log size to 500M"
+				read -rp "Please select a cleaning method:" c
+				case $c in
+					1) journalctl --vacuum-time=7d ;;
+					2) journalctl --vacuum-time=3d ;;
+					3) journalctl --vacuum-size=500M ;;
+					*) echo "Invalid option" ;;
+				esac
+				echo "✔ Journal log cleaning completed"
+				sleep 2
+				;;
+			*)
+				break
+				;;
+		esac
+	done
+}
+
+
+
+
 
 
 linux_Settings() {
@@ -13667,9 +13836,11 @@ linux_Settings() {
 	  echo -e "${gl_kjlan}33.  ${gl_bai}Set up system recycle bin${gl_kjlan}34.  ${gl_bai}System backup and recovery"
 	  echo -e "${gl_kjlan}35.  ${gl_bai}ssh remote connection tool${gl_kjlan}36.  ${gl_bai}Hard disk partition management tool"
 	  echo -e "${gl_kjlan}37.  ${gl_bai}Command line history${gl_kjlan}38.  ${gl_bai}rsync remote synchronization tool"
-	  echo -e "${gl_kjlan}39.  ${gl_bai}Command Favorites${gl_huang}★${gl_bai}"
+	  echo -e "${gl_kjlan}39.  ${gl_bai}Command Favorites${gl_huang}★${gl_bai}                       ${gl_kjlan}40.  ${gl_bai}Network card management tool"
 	  echo -e "${gl_kjlan}------------------------"
-	  echo -e "${gl_kjlan}41.  ${gl_bai}message board${gl_kjlan}66.  ${gl_bai}One-stop system tuning${gl_huang}★${gl_bai}"
+	  echo -e "${gl_kjlan}41.  ${gl_bai}System log management tool${gl_huang}★${gl_bai}"
+	  echo -e "${gl_kjlan}------------------------"
+	  echo -e "${gl_kjlan}61.  ${gl_bai}message board${gl_kjlan}66.  ${gl_bai}One-stop system tuning${gl_huang}★${gl_bai}"
 	  echo -e "${gl_kjlan}99.  ${gl_bai}Restart the server${gl_kjlan}100. ${gl_bai}Privacy and security"
 	  echo -e "${gl_kjlan}101. ${gl_bai}Advanced usage of k command${gl_huang}★${gl_bai}                    ${gl_kjlan}102. ${gl_bai}Uninstall tech lion script"
 	  echo -e "${gl_kjlan}------------------------"
@@ -13713,7 +13884,7 @@ linux_Settings() {
 			echo "python version management"
 			echo "Video introduction: https://www.bilibili.com/video/BV1Pm42157cK?t=0.1"
 			echo "---------------------------------------"
-			echo "This function can seamlessly install any version officially supported by Python!"
+			echo "This function can seamlessly install any version officially supported by python!"
 			local VERSION=$(python3 -V 2>&1 | awk '{print $2}')
 			echo -e "Current python version number:${gl_huang}$VERSION${gl_bai}"
 			echo "------------"
@@ -14580,7 +14751,17 @@ EOF
 			  linux_fav
 			  ;;
 
+		  40)
+			  clear
+			  net_menu
+			  ;;
+
 		  41)
+			  clear
+			  log_menu
+			  ;;
+
+		  61)
 			clear
 			send_stats "message board"
 			echo "Visit the official message board of Technology Lion. If you have any ideas about the script, please leave a message to exchange!"
@@ -15015,7 +15196,7 @@ run_commands_on_servers() {
 		local username=${SERVER_ARRAY[i+3]}
 		local password=${SERVER_ARRAY[i+4]}
 		echo
-		echo -e "${gl_huang}Connect to$name ($hostname)...${gl_bai}"
+		echo -e "${gl_huang}connect to$name ($hostname)...${gl_bai}"
 		# sshpass -p "$password" ssh -o StrictHostKeyChecking=no "$username@$hostname" -p "$port" "$1"
 		sshpass -p "$password" ssh -t -o StrictHostKeyChecking=no "$username@$hostname" -p "$port" "$1"
 	done
@@ -15405,7 +15586,7 @@ done
 
 
 k_info() {
-send_stats "k command reference use case"
+send_stats "k command reference examples"
 echo "-------------------"
 echo "Video introduction: https://www.bilibili.com/video/BV1ib421E7it?t=0.1"
 echo "The following is a reference use case for the k command:"
@@ -15695,20 +15876,20 @@ else
 
 
 		sshkey)
-			shift		
+			shift
 			case "$1" in
 				"" )
 					# sshkey → interactive menu
 					send_stats "SSHKey interactive menu"
 					sshkey_panel
 					;;
-		
+
 				github )
 					shift
 					send_stats "Import SSH public key from GitHub"
 					fetch_github_ssh_keys "$1"
 					;;
-		
+
 				http://*|https://* )
 					send_stats "Import SSH public key from URL"
 					fetch_remote_ssh_keys "$1"
@@ -15734,5 +15915,4 @@ else
 			;;
 	esac
 fi
-
 

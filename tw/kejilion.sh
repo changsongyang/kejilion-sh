@@ -1,5 +1,5 @@
 #!/bin/bash
-sh_v="4.3.4"
+sh_v="4.3.5"
 
 
 gl_hui='\e[37m'
@@ -1442,10 +1442,6 @@ install_ssltls() {
 					openssl req -x509 -key /etc/letsencrypt/live/$yuming/privkey.pem -out /etc/letsencrypt/live/$yuming/fullchain.pem -days 5475 -subj "/C=US/ST=State/L=City/O=Organization/OU=Organizational Unit/CN=Common Name"
 				fi
 			else
-				if ! iptables -C INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null; then
-					iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT
-				fi
-
 				docker run --rm -p 80:80 -v /etc/letsencrypt/:/etc/letsencrypt certbot/certbot certonly --standalone -d "$yuming" --email your@email.com --agree-tos --no-eff-email --force-renewal --key-type ecdsa
 			fi
 	  fi
@@ -1602,16 +1598,11 @@ certs_status() {
 			fi
 
 	  		  ;;
-	  	  3)
+	  	  *)
 	  	  	send_stats "不帶證書改用HTTP訪問"
 		  	sed -i '/if (\$scheme = http) {/,/}/s/^/#/' /home/web/conf.d/${yuming}.conf
 			sed -i '/ssl_certificate/d; /ssl_certificate_key/d' /home/web/conf.d/${yuming}.conf
 			sed -i '/443 ssl/d; /443 quic/d' /home/web/conf.d/${yuming}.conf
-	  		  ;;
-	  	  *)
-	  	  	send_stats "退出申請"
-			rm -f /home/web/conf.d/${yuming}.conf
-			exit
 	  		  ;;
 		esac
 	fi
@@ -4898,7 +4889,7 @@ import_sshkey() {
 	if [[ ! "$public_key" =~ ^ssh-(rsa|ed25519|ecdsa) ]]; then
 		echo -e "${gl_hong}錯誤：看起來不像合法的 SSH 公鑰。${gl_bai}"
 		return 1
-	fi	
+	fi
 
 	if grep -Fxq "$public_key" ~/.ssh/authorized_keys 2>/dev/null; then
 		echo "該公鑰已存在，無需重複添加"
@@ -5059,7 +5050,7 @@ sshkey_panel() {
 	  	  IS_KEY_ENABLED="${gl_hui}未啟用${gl_bai}"
 	  fi
   	  echo -e "ROOT私鑰登錄模式${IS_KEY_ENABLED}"
-  	  echo "視頻介紹: https://www.bilibili.com/video/BV1Q4421X78n?t=209.4"
+  	  echo "進階玩法: https://blog.kejilion.pro/ssh-key"
   	  echo "------------------------------------------------"
   	  echo "將會生成密鑰對，更安全的方式SSH登錄"
 	  echo "------------------------"
@@ -7799,7 +7790,7 @@ docker_ssh_migration() {
 			echo -e "3. 還原docker項目"
 			echo -e "4. 刪除docker項目的備份文件"
 			echo "------------------------"
-			echo -e "0. 返回上一級菜單"
+			echo -e "0. 返回上一級選單"
 			echo "------------------------"
 			read -e -p  "請選擇:" choice
 			case $choice in
@@ -13636,6 +13627,184 @@ fail2ban_panel() {
 
 
 
+net_menu() {
+
+	send_stats "網卡管理工具"
+	show_nics() {
+		echo "================ 當前網卡信息 ================"
+		printf "%-18s %-12s %-20s %-26s\n" "網卡名" "狀態" "IP地址" "MAC地址"
+		echo "------------------------------------------------"
+		for nic in $(ls /sys/class/net); do
+			state=$(cat /sys/class/net/$nic/operstate 2>/dev/null)
+			ipaddr=$(ip -4 addr show $nic | awk '/inet /{print $2}' | head -n1)
+			mac=$(cat /sys/class/net/$nic/address 2>/dev/null)
+			printf "%-15s %-10s %-18s %-20s\n" "$nic" "$state" "${ipaddr:-无}" "$mac"
+		done
+		echo "================================================"
+	}
+
+	while true; do
+		clear
+		show_nics
+		echo
+		echo "=========== 網卡管理菜單 ==========="
+		echo "1. 啟用網卡"
+		echo "2. 禁用網卡"
+		echo "3. 查看網卡詳細信息"
+		echo "4. 刷新網卡信息"
+		echo "0. 返回上一級選單"
+		echo "===================================="
+		read -rp "請選擇操作:" choice
+
+		case $choice in
+			1)
+				send_stats "啟用網卡"
+				read -rp "請輸入要啟用的網卡名:" nic
+				if ip link show "$nic" &>/dev/null; then
+					ip link set "$nic" up && echo "✔ 網卡$nic已啟用"
+				else
+					echo "✘ 網卡不存在"
+				fi
+				read -rp "按回車繼續..."
+				;;
+			2)
+				send_stats "禁用網卡"
+				read -rp "請輸入要禁用的網卡名:" nic
+				if ip link show "$nic" &>/dev/null; then
+					ip link set "$nic" down && echo "✔ 網卡$nic已禁用"
+				else
+					echo "✘ 網卡不存在"
+				fi
+				read -rp "按回車繼續..."
+				;;
+			3)
+				send_stats "查看網卡詳情"
+				read -rp "請輸入要查看的網卡名:" nic
+				if ip link show "$nic" &>/dev/null; then
+					echo "========== $nic詳細信息 =========="
+					ip addr show "$nic"
+					ethtool "$nic" 2>/dev/null | head -n 10
+				else
+					echo "✘ 網卡不存在"
+				fi
+				read -rp "按回車繼續..."
+				;;
+			4)
+				send_stats "刷新網卡信息"
+				continue
+				;;
+			*)
+				break
+				;;
+		esac
+	done
+}
+
+
+
+log_menu() {
+	send_stats "系統日誌管理工具"
+
+	show_log_overview() {
+		echo "============= 系統日誌概覽 ============="
+		echo "主機名: $(hostname)"
+		echo "系統時間: $(date)"
+		echo
+		echo "[ /var/log 目錄佔用 ]"
+		du -sh /var/log 2>/dev/null
+		echo
+		echo "[ journal 日誌佔用 ]"
+		journalctl --disk-usage 2>/dev/null
+		echo "========================================"
+	}
+
+	while true; do
+		clear
+		show_log_overview
+		echo
+		echo "=========== 系統日誌管理菜單 ==========="
+		echo "1. 查看最近系統日誌（journal）"
+		echo "2. 查看指定服務日誌"
+		echo "3. 查看登錄/安全日誌"
+		echo "4. 實時跟踪日誌"
+		echo "5. 清理舊 journal 日誌"
+		echo "0. 返回上一級選單"
+		echo "======================================="
+		read -rp "請選擇操作:" choice
+
+		case $choice in
+			1)
+				send_stats "查看最近日誌"
+				read -rp "查看最近多少行日誌？ [默認 100]:" lines
+				lines=${lines:-100}
+				journalctl -n "$lines" --no-pager
+				read -rp "按回車繼續..."
+				;;
+			2)
+				send_stats "查看指定服務日誌"
+				read -rp "請輸入服務名（如 sshd、nginx）:" svc
+				if systemctl list-unit-files | grep -q "^$svc"; then
+					journalctl -u "$svc" -n 100 --no-pager
+				else
+					echo "✘ 服務不存在或無日誌"
+				fi
+				read -rp "按回車繼續..."
+				;;
+			3)
+				send_stats "查看登錄/安全日誌"
+				echo "====== 最近登錄日誌 ======"
+				last -n 10
+				echo
+				echo "====== 認證日誌 ======"
+				if [ -f /var/log/secure ]; then
+					tail -n 20 /var/log/secure
+				elif [ -f /var/log/auth.log ]; then
+					tail -n 20 /var/log/auth.log
+				else
+					echo "未找到安全日誌文件"
+				fi
+				read -rp "按回車繼續..."
+				;;
+			4)
+				send_stats "實時跟踪日誌"
+				echo "1) 系統日誌"
+				echo "2) 指定服務日誌"
+				read -rp "選擇跟踪類型:" t
+				if [ "$t" = "1" ]; then
+					journalctl -f
+				elif [ "$t" = "2" ]; then
+					read -rp "輸入服務名:" svc
+					journalctl -u "$svc" -f
+				else
+					echo "無效選擇"
+				fi
+				;;
+			5)
+				send_stats "清理舊 journal 日誌"
+				echo "⚠️ 清理 journal 日誌（安全方式）"
+				echo "1) 保留最近 7 天"
+				echo "2) 保留最近 3 天"
+				echo "3) 限制日誌最大 500M"
+				read -rp "請選擇清理方式:" c
+				case $c in
+					1) journalctl --vacuum-time=7d ;;
+					2) journalctl --vacuum-time=3d ;;
+					3) journalctl --vacuum-size=500M ;;
+					*) echo "無效選項" ;;
+				esac
+				echo "✔ journal 日誌清理完成"
+				sleep 2
+				;;
+			*)
+				break
+				;;
+		esac
+	done
+}
+
+
+
+
 
 
 linux_Settings() {
@@ -13667,9 +13836,11 @@ linux_Settings() {
 	  echo -e "${gl_kjlan}33.  ${gl_bai}設置系統回收站${gl_kjlan}34.  ${gl_bai}系統備份與恢復"
 	  echo -e "${gl_kjlan}35.  ${gl_bai}ssh遠程連接工具${gl_kjlan}36.  ${gl_bai}硬盤分區管理工具"
 	  echo -e "${gl_kjlan}37.  ${gl_bai}命令行歷史記錄${gl_kjlan}38.  ${gl_bai}rsync遠程同步工具"
-	  echo -e "${gl_kjlan}39.  ${gl_bai}命令收藏夾${gl_huang}★${gl_bai}"
+	  echo -e "${gl_kjlan}39.  ${gl_bai}命令收藏夾${gl_huang}★${gl_bai}                       ${gl_kjlan}40.  ${gl_bai}網卡管理工具"
 	  echo -e "${gl_kjlan}------------------------"
-	  echo -e "${gl_kjlan}41.  ${gl_bai}留言板${gl_kjlan}66.  ${gl_bai}一條龍系統調優${gl_huang}★${gl_bai}"
+	  echo -e "${gl_kjlan}41.  ${gl_bai}系統日誌管理工具${gl_huang}★${gl_bai}"
+	  echo -e "${gl_kjlan}------------------------"
+	  echo -e "${gl_kjlan}61.  ${gl_bai}留言板${gl_kjlan}66.  ${gl_bai}一條龍系統調優${gl_huang}★${gl_bai}"
 	  echo -e "${gl_kjlan}99.  ${gl_bai}重啟服務器${gl_kjlan}100. ${gl_bai}隱私與安全"
 	  echo -e "${gl_kjlan}101. ${gl_bai}k命令高級用法${gl_huang}★${gl_bai}                    ${gl_kjlan}102. ${gl_bai}卸載科技lion腳本"
 	  echo -e "${gl_kjlan}------------------------"
@@ -14580,7 +14751,17 @@ EOF
 			  linux_fav
 			  ;;
 
+		  40)
+			  clear
+			  net_menu
+			  ;;
+
 		  41)
+			  clear
+			  log_menu
+			  ;;
+
+		  61)
 			clear
 			send_stats "留言板"
 			echo "訪問科技lion官方留言板，您對腳本有任何想法歡迎留言交流！"
@@ -15695,20 +15876,20 @@ else
 
 
 		sshkey)
-			shift		
+			shift
 			case "$1" in
 				"" )
 					# sshkey → 交互菜單
 					send_stats "SSHKey 交互菜單"
 					sshkey_panel
 					;;
-		
+
 				github )
 					shift
 					send_stats "從 GitHub 導入 SSH 公鑰"
 					fetch_github_ssh_keys "$1"
 					;;
-		
+
 				http://*|https://* )
 					send_stats "從 URL 導入 SSH 公鑰"
 					fetch_remote_ssh_keys "$1"
@@ -15734,5 +15915,4 @@ else
 			;;
 	esac
 fi
-
 
