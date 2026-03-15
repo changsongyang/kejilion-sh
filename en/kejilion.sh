@@ -3520,7 +3520,7 @@ ldnmp_Proxy_backend() {
 list_stream_services() {
 
 	STREAM_DIR="/home/web/stream.d"
-	printf "%-25s %-18s %-25s %-20s\n" "Service name" "Communication type" "Local address" "Backend address"
+	printf "%-25s %-18s %-25s %-20s\n" "Service name" "Communication type" "local address" "Backend address"
 
 	if [ -z "$(ls -A "$STREAM_DIR")" ]; then
 		return
@@ -5403,7 +5403,7 @@ dd_xitong() {
 				;;
 
 			  41)
-				send_stats "Reinstall Windows 11"
+				send_stats "Reinstall windows 11"
 				dd_xitong_2
 				bash InstallNET.sh -windows 11 -lang "cn"
 				reboot
@@ -5794,7 +5794,7 @@ clamav() {
 						;;
 					3)
 					  send_stats "Custom directory scan"
-					  read -e -p "Please enter the directories to scan, separated by spaces (for example: /etc /var /usr /home /root):" directories
+					  read -e -p "Please enter the directories to be scanned, separated by spaces (for example: /etc /var /usr /home /root):" directories
 					  install_docker
 					  clamav_freshclam
 					  clamav_scan $directories
@@ -5937,7 +5937,7 @@ restore_defaults() {
 
 # Website building optimization function
 optimize_web_server() {
-	echo -e "${gl_lv}Switch to website construction optimization mode...${gl_bai}"
+	echo -e "${gl_lv}Switch to website building optimization mode...${gl_bai}"
 
 	echo -e "${gl_lv}Optimize file descriptors...${gl_bai}"
 	ulimit -n 65535
@@ -6951,7 +6951,7 @@ run_task() {
 	else
 		echo "Sync failed! Please check the following:"
 		echo "1. Is the network connection normal?"
-		echo "2. Whether the remote host is accessible"
+		echo "2. Is the remote host accessible?"
 		echo "3. Is the authentication information correct?"
 		echo "4. Do the local and remote directories have correct access permissions?"
 	fi
@@ -7594,7 +7594,7 @@ docker_ssh_migration() {
 				local VOL_ARGS=""
 				for path in $VOL_PATHS; do VOL_ARGS+="-v $path:$path "; done
 
-				# mirror
+				# Mirror
 				local IMAGE
 				IMAGE=$(jq -r '.[0].Config.Image' "$inspect_file")
 
@@ -7755,7 +7755,7 @@ docker_ssh_migration() {
 
 		echo -e "${YELLOW}Transferring backup...${NC}"
 		if [[ -z "$TARGET_PASS" ]]; then
-			# Log in using key
+			# Log in with key
 			scp -P "$TARGET_PORT" -o StrictHostKeyChecking=no -r "$LATEST_TAR" "$TARGET_USER@$TARGET_IP:/tmp/"
 		fi
 
@@ -8122,7 +8122,7 @@ linux_test() {
 	  echo -e "${gl_kjlan}14.  ${gl_bai}nxtrace fast backhaul test script"
 	  echo -e "${gl_kjlan}15.  ${gl_bai}nxtrace specifies IP backhaul test script"
 	  echo -e "${gl_kjlan}16.  ${gl_bai}ludashi2020 three network line test"
-	  echo -e "${gl_kjlan}17.  ${gl_bai}i-abc multi-function speed test script"
+	  echo -e "${gl_kjlan}17.  ${gl_bai}i-abc multifunctional speed test script"
 	  echo -e "${gl_kjlan}18.  ${gl_bai}NetQuality network quality check script${gl_huang}★${gl_bai}"
 
 	  echo -e "${gl_kjlan}------------------------"
@@ -9886,7 +9886,7 @@ while true; do
 			check_docker_image_update $docker_name
 
 			clear
-			echo -e "postal service$check_docker $update_status"
+			echo -e "postal services$check_docker $update_status"
 			echo "poste.io is an open source mail server solution,"
 			echo "Video introduction: https://www.bilibili.com/video/BV1wv421C71t?t=0.1"
 
@@ -11624,7 +11624,7 @@ while true; do
 
 		}
 
-		local docker_describe="Is a lightweight, high-performance music streaming server"
+		local docker_describe="It is a lightweight, high-performance music streaming server"
 		local docker_url="Official website introduction: https://www.navidrome.org/"
 		local docker_use=""
 		local docker_passwd=""
@@ -12208,7 +12208,7 @@ while true; do
 
 		}
 
-		local docker_describe="A program to watch movies and live broadcasts together remotely. It provides simultaneous viewing, live broadcast, chat and other functions"
+		local docker_describe="A program for watching movies and live broadcasts together remotely. It provides simultaneous viewing, live broadcast, chat and other functions"
 		local docker_url="Official website introduction: https://github.com/synctv-org/synctv"
 		local docker_use="echo \"Initial account and password: root. Please change the login password in time after logging in\""
 		local docker_passwd=""
@@ -13363,7 +13363,7 @@ linux_work() {
 	  echo -e "${gl_kjlan}2.   ${gl_bai}Work Area 2"
 	  echo -e "${gl_kjlan}3.   ${gl_bai}Work Area 3"
 	  echo -e "${gl_kjlan}4.   ${gl_bai}Work Area 4"
-	  echo -e "${gl_kjlan}5.   ${gl_bai}Workspace No. 5"
+	  echo -e "${gl_kjlan}5.   ${gl_bai}Work Area 5"
 	  echo -e "${gl_kjlan}6.   ${gl_bai}Work Area 6"
 	  echo -e "${gl_kjlan}7.   ${gl_bai}Work Area 7"
 	  echo -e "${gl_kjlan}8.   ${gl_bai}Work Area 8"
@@ -13884,7 +13884,7 @@ linux_Settings() {
 			echo "python version management"
 			echo "Video introduction: https://www.bilibili.com/video/BV1Pm42157cK?t=0.1"
 			echo "---------------------------------------"
-			echo "This function can seamlessly install any version officially supported by python!"
+			echo "This function can seamlessly install any version officially supported by Python!"
 			local VERSION=$(python3 -V 2>&1 | awk '{print $2}')
 			echo -e "Current python version number:${gl_huang}$VERSION${gl_bai}"
 			echo "------------"
@@ -14073,8 +14073,8 @@ EOF
 						;;
 					2)
 						rm -f /etc/gai.conf
-						echo "Switched to IPv6 first"
-						send_stats "Switched to IPv6 first"
+						echo "Switched to IPv6 priority"
+						send_stats "Switched to IPv6 priority"
 						;;
 
 					3)
@@ -14570,7 +14570,7 @@ EOF
 					echo -e "${gl_lv}The currently set inbound traffic limit threshold is:${gl_huang}${rx_threshold_gb}${gl_lv}G${gl_bai}"
 					echo -e "${gl_lv}The currently set outbound traffic limiting threshold is:${gl_huang}${tx_threshold_gb}${gl_lv}GB${gl_bai}"
 				else
-					echo -e "${gl_hui}The current limiting shutdown function is not currently enabled${gl_bai}"
+					echo -e "${gl_hui}Current limiting shutdown function is not currently enabled${gl_bai}"
 				fi
 
 				echo
@@ -15586,7 +15586,7 @@ done
 
 
 k_info() {
-send_stats "k command reference use case"
+send_stats "k command reference examples"
 echo "-------------------"
 echo "Video introduction: https://www.bilibili.com/video/BV1ib421E7it?t=0.1"
 echo "The following is a reference use case for the k command:"
