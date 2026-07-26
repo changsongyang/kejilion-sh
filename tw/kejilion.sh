@@ -3240,7 +3240,7 @@ f2b_basic_config() {
 		fi
 	fi
 
-	echo "即将配置 SSH jail：$jail_name"
+	echo "即將配置 SSH jail：$jail_name"
 	read -e -p "封禁時長 bantime (秒/分鐘/小時，如 3600 或 1h) [預設 1h]:" bantime
 	read -e -p "時間窗口 findtime (秒/分鐘/小時，如 600 或 10m) [預設 10m]:" findtime
 	read -e -p "重試次數 maxretry (整數) [預設 5]:" maxretry
@@ -4355,7 +4355,7 @@ frps_panel() {
 		fi
 		echo ""
 		echo "------------------------"
-		echo "1. 安装                  2. 更新                  3. 卸载"
+		echo "1. 安裝 2. 更新 3. 卸載"
 		echo "------------------------"
 		echo "5. 內部網路服務網域存取 6. 刪除網域名稱訪問"
 		echo "------------------------"
@@ -4422,7 +4422,7 @@ frps_panel() {
 
 			00)
 				send_stats "重新整理FRP服務狀態"
-				echo "已经刷新FRP服务状态"
+				echo "已經刷新FRP服務狀態"
 				;;
 
 			*)
@@ -6297,7 +6297,7 @@ SYSCTL
 			skipped=$((skipped + 1))
 		fi
 	done < "$CONF"
-	echo -e "${gl_lv}已應用${applied}項參數${skipped:+，跳過${skipped} 项不支持的参数}${gl_bai}"
+	echo -e "${gl_lv}已應用${applied}項參數${skipped:+，跳過${skipped}項不支援的參數}${gl_bai}"
 
 	# ── 透明大頁面 ──
 	if [ -f /sys/kernel/mm/transparent_hugepage/enabled ]; then
@@ -10425,7 +10425,7 @@ for name, provider in list(providers.items()):
                 summary.append(f'✅ {name}: 使用者已確認刪除該 provider 及全部相關模型引用')
         else:
             send_stat('OpenClaw API刪失敗Provider-拒絕')
-            summary.append(f'ℹ️ {name}: 用户未确认删除，保留现有 provider 配置')
+            summary.append(f'ℹ️ {name}: 使用者未確認刪除，保留現有 provider 配置')
         continue
 
     if attempts > 1:
@@ -11155,7 +11155,7 @@ for mid in added_ids:
     new_models.append(nm)
 
 if not new_models:
-    print(f'❌ {target}: 同步后无可用模型，已中止写入')
+    print(f'❌ {target}: 同步後無可用模型，已中止寫入')
     raise SystemExit(5)
 
 expected_refs = {model_ref(target, str(m['id'])) for m in new_models if isinstance(m, dict) and m.get('id')}
@@ -15105,7 +15105,7 @@ for idx,item in enumerate(agents,1):
 			echo "正在配置智能體身份..."
 			openclaw agents set-identity --agent "$agent_id" --name "$name" --theme "$theme"
 		else
-			echo "❌ 智能體創建失敗"
+			echo "❌ 智能體建立失敗"
 			return 1
 		fi
 	}
@@ -15423,7 +15423,7 @@ openclaw_backup_restore_menu() {
 
 		domains=$(openclaw_find_webui_domain)
 		if [ -n "$domains" ]; then
-			echo "網域地址："
+			echo "網域名稱地址："
 			echo "$domains" | while read d; do
 				echo "https://${d}/#token=${token}"
 			done
@@ -17094,7 +17094,7 @@ while true; do
 			ip_address
 			echo "已經安裝完成"
 			check_docker_app_ip
-			echo "初始使用者名稱密碼均為: admin"
+			echo "初始使用者名稱密碼皆為: admin"
 		}
 
 		docker_app_update() {
@@ -20932,7 +20932,7 @@ EOF
 			  echo "TG-bot監控預警功能"
 			  echo "影片介紹: https://youtu.be/vLL-eb3Z_TY"
 			  echo "------------------------------------------------"
-			  echo "您需要設定tg機器人API和接收預警的用戶ID，即可實現本機CPU，內存，硬碟，流量，SSH登入的即時監控預警"
+			  echo "您需要設定tg機器人API和接收預警的使用者ID，即可實現本機CPU，內存，硬碟，流量，SSH登入的即時監控預警"
 			  echo "到達閾值後會向用戶發送預警訊息"
 			  echo -e "${gl_hui}-關於流量，重啟伺服器將重新計算-${gl_bai}"
 			  read -e -p "確定繼續嗎？ (Y/N):" choice
